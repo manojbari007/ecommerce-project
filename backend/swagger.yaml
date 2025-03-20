@@ -1,0 +1,1296 @@
+openapi: 3.0.0
+info:
+  title: E-commerce API
+  description: API documentation for the E-commerce backend.
+  version: 3.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+#  user api documentation
+paths:
+  /user/signup:
+    post:
+      summary: User Signup
+      description: SignUp a new user with first name, last name, mobile number, email, and password.
+      tags:
+        - user
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName:
+                  type: string
+                  example: John
+                lastName:
+                  type: string
+                  example: Doe
+                mobileNumber:
+                  type: number
+                  example: 1234567890
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@gmail.com
+                password:
+                  type: string
+                  format: password
+                  example: "SecurePassword123!"
+      responses:
+        "200":
+          description: User SignUp successfully.
+        "400":
+          description: Validation error.
+        "500":
+          description: Internal server error.
+
+  # user Login documentation
+  /user/login:
+    post:
+      summary: User Login
+      description: Log in a user with their email and password.
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@example.com
+                password:
+                  type: string
+                  format: password
+                  example: "SecurePassword123!"
+      responses:
+        "200":
+          description: User logged in successfully and JWT token generated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful!"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+        "400":
+          description: Invalid login credentials.
+        "500":
+          description: Internal server error.
+
+  # user forget password documentation
+  /user/forget-password:
+    post:
+      summary: Forget Password
+      description: Send a forget password token
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: john.doe@gmail.com
+      responses:
+        "200":
+          description: Password reset token sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Check your email for the password reset token."
+                  resetToken:
+                    type: string
+                    example: "abcdef1234567890"
+        "404":
+          description: User not found
+
+        "500":
+          description: Internal server error
+
+  # update- password put api documentation
+  /user/update-password/{id}:
+    put:
+      summary: user can update password
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: user Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                oldPassword:
+                  type: string
+                  description: user old password
+                  example: OldPass123
+                newPassword:
+                  type: string
+                  description: new password set
+                  example: NewPass123
+
+      responses:
+        "200":
+          description: Password updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password updated successfully
+
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: An unexpected error occurred
+
+  # user list api documentation
+  /user/list:
+    get:
+      summary: Get all users (Admin only)
+      description: Retrieve a list of all users.
+      tags:
+        - Admin
+      responses:
+        "200":
+          description: List of users retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  list:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          example: "60d21b4667d0d8992e610c85"
+                        name:
+                          type: string
+                          example: "John Doe"
+                        email:
+                          type: string
+                          example: "john.doe@example.com"
+        "500":
+          description: Internal server error
+
+  #user delete api documentation
+  /user/delete/{id}:
+    delete:
+      summary: Delete a user
+      description: Deleted specific  user Id details.
+      tags:
+        - Admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: user Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User deleted successfully
+
+      "404":
+        description: User not found
+      "500":
+        description: Internal server error
+
+  #user profile update api documentation
+  /userProfile/update/{id}:
+    put:
+      summary: Update user profile
+      description: Allows users to update their profile details.
+      tags:
+        - user
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: user Id
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstName
+                - lastName
+                - email
+                - mobileNumber
+                - profileImage
+                - gender
+                - dob
+              properties:
+                firstName:
+                  type: string
+                  example: "John"
+                lastName:
+                  type: string
+                  example: "Doe"
+                email:
+                  type: string
+                  format: email
+                  example: "john.doe@example.com"
+                mobileNumber:
+                  type: string
+                  example: "9876543210"
+                profileImage:
+                  type: string
+                  format: uri
+                  example: "https://example.com/profile.jpg"
+                gender:
+                  type: string
+                  enum: [male, female]
+                  example: "male"
+                dob:
+                  type: string
+                  format: date
+                  example: "01/01/1990"
+      responses:
+        "200":
+          description: User profile updated successfully
+        "400":
+          description: Invalid input data
+        "500":
+          description: Internal server error
+
+  # user address post api documentation
+  /userAddress/add:
+    post:
+      summary: Add a new address for the user
+      description: This API allows a user to add a new address to their profile.
+      tags:
+        - user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - type
+                - houseNo
+                - area
+                - landmark
+                - pinCode
+                - city
+                - state
+              properties:
+                userId:
+                  type: string
+                  example: "67c6e717a55180cf1e6d98b0"
+                type:
+                  type: string
+                  enum: [home, work, other]
+                  example: "home"
+                houseNo:
+                  type: Number
+                  example: 90
+                area:
+                  type: string
+                  example: "aroma circle"
+                landmark:
+                  type: string
+                  example: "nearby busStand"
+                pinCode:
+                  type: Number
+                  example: 385001
+                city:
+                  type: string
+                  example: "Ahmadabad"
+                state:
+                  type: string
+                  example: "Gujarat"
+      responses:
+        "200":
+          description: Address added successfully.
+        "400":
+          description: invalid parameters.
+        "500":
+          description: Internal Server Error.
+
+  #category post api documentation
+  /category/add:
+    post:
+      summary: Admin Add a new category
+      description: Creates a new category .
+      tags:
+        - Category
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - status
+              properties:
+                name:
+                  type: string
+                  example: "Electronics"
+                status:
+                  type: boolean
+                  example: true
+      responses:
+        "200":
+          description: Category added successfully
+        "500":
+          description: Internal server error
+
+  #category update put api documentation
+  /category/update/{id}:
+    put:
+      summary: Admin Update category
+      description: Update the details of an existing category by ID.
+      tags:
+        - Category
+      operationId: updateCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: category Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the category.
+                status:
+                  type: string
+                  description: The status of the category (e.g., active, inactive).
+              required:
+                - name
+                - status
+      responses:
+        "200":
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  name: string
+        "500":
+          description: Internal server error
+
+  # category list get api documentation
+  /category/list:
+    get:
+      summary: Get all categories
+      description: Retrieve a list of all category.
+      tags:
+        - Category
+      operationId: categoryList
+      responses:
+        "200":
+          description: Successfully retrieved category list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  categoryList:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          description: The unique identifier of the category.
+                        name:
+                          type: string
+                          description: The name of the category.
+                        status:
+                          type: string
+                          description: The status of the category .
+                        isDeleted:
+                          type: boolean
+                          description: Whether the category has been deleted .
+        "500":
+          description: Internal server error
+
+  # category delete api documentation
+  /category/delete/{id}:
+    delete:
+      summary: Admin Delete category
+      description: category as deleted using its Id.
+      tags:
+        - Category
+      operationId: deleteCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: category Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Category deleted Successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Category deleted successfully"
+        "400":
+          description: Bad request
+        "404":
+          description: Category not found
+        "500":
+          description: Internal server error
+
+  # subCategory  post api documentation
+  /subCategory/add:
+    post:
+      summary: Admin Add subCategory
+      description: create new subCategory
+      tags:
+        - subCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - categoryId
+                - name
+              properties:
+                categoryId:
+                  type: string
+                  description: "Enter category Id"
+                  example: "67b45651f92e535778ab7a2a"
+                name:
+                  type: string
+                  example: "smart device"
+      responses:
+        "200":
+          description: subCategory added successfully
+        "500":
+          description: Internal server error
+
+  # subCategory put api documentation
+  /subCategory/update/{id}:
+    put:
+      summary: Admin  update a subCategory
+      description: update subCategory
+      tags:
+        - subCategory
+      operationId: updateSubCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: subCategory Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                  description: Category Id
+                name:
+                  type: string
+                  description: subCategory name
+              required:
+                - categoryId
+                - name
+      responses:
+        "200":
+          description: subCategory updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  name:
+                    type: string
+        "500":
+          description: Internal server error
+
+  #subCategory delete api documentation
+  /subCategory/delete/{id}:
+    delete:
+      summary: Admin delete subCategory
+      tags:
+        - subCategory
+      operationId: deleteSubCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: subCategory Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: subCategory deleted successfully
+        "500":
+          description: Internal server error
+
+  # subCategory list get api documentation
+  /subCategory/list:
+    get:
+      summary: get all subCategory details
+      tags:
+        - subCategory
+      responses:
+        "200":
+          description: successfully retrieved subCategory list
+        "500":
+          description: Internal server error
+
+  # product post api documentation
+  /product/add:
+    post:
+      summary: Admin Add a new product
+      tags:
+        - Product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - categoryId
+                - subCategoryId
+                - name
+                - images
+                - description
+                - quantity
+                - price
+                - status
+              properties:
+                categoryId:
+                  type: string
+                  description: category Id
+                  example: "60d21b4667d0d8992e610c85"
+                subCategoryId:
+                  type: string
+                  description: subCategory Id
+                  example: "60d21b4667d0d8992e610c85"
+                name:
+                  type: string
+                  example: "smart TV"
+                image:
+                  type: string
+                  example: "https://example.com/image.jpg"
+                description:
+                  type: string
+                  example: "4k smart TV"
+                quantity:
+                  type: Number
+                  example: 1
+                price:
+                  type: Number
+                  example: 1000
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  default: "active"
+      responses:
+        "200":
+          description: Product added successfully
+        "500":
+          description: Internal server error
+
+  # product put api documentation
+  /product/update/{id}:
+    put:
+      summary: Admin Update product
+      description: update product details by existing product Id.
+      tags:
+        - Product
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: product Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                categoryId:
+                  type: string
+                  description: category Id
+                  example: "60d21b4667d0d8992e610c85"
+                subCategoryId:
+                  type: string
+                  description: subCategory Id
+                  example: "60d21b4667d0d8992e610c85"
+                name:
+                  type: string
+                  example: "sony TV"
+                image:
+                  type: string
+                  example: "https://example.com/sonyIV.jpg"
+                description:
+                  type: string
+                  example: "OlED SMART TV"
+                quantity:
+                  type: Number
+                  example: 1
+                price:
+                  type: Number
+                  example: 1000
+                status:
+                  type: string
+                  enum: [active, inactive]
+                  default: "active"
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  updateProduct:
+                    type: object
+        "500":
+          description: Internal server error
+
+  # product delete api documentation
+  /product/delete/{id}:
+    delete:
+      summary: Admin Deleted product
+      description: Delete product by product Id.
+      tags:
+        - Product
+      operationId: deleteProduct
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: product Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product deleted successfully
+        "500":
+          description: Internal server error
+
+  #product list get api documentation
+  /product/list:
+    get:
+      summary: Get all products
+      description: Retrieve a list of all products.
+      tags:
+        - Product
+      responses:
+        "200":
+          description: Successfully retrieved product list
+
+        "500":
+          description: Internal server error
+
+  #product details get api documentation
+  /product/details/{id}:
+    get:
+      summary: Get product details
+      description: Retrieve  product details by specific product Id
+      tags:
+        - Product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: product Id
+      responses:
+        "200":
+          description: Successfully retrieved product details
+        "500":
+          description: Internal server error
+
+  # order add post api documentation
+  /order/add:
+    post:
+      summary: Add a new order
+      tags:
+        - Order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - productId
+                - userAddressId
+                - quantity
+                - couponCode
+                - totalAmount
+                - paymentType
+              properties:
+                userId:
+                  type: string
+                  example: "67a44c203fb942f0ea219fba"
+                productId:
+                  type: string
+                  example: "67a478d02f3aa3de44558df3"
+                userAddressId:
+                  type: string
+                  example: "67a45a94d8e8d6128fd53168"
+                quantity:
+                  type: number
+                  example: 1
+                couponCode:
+                  type: string
+                  example: "DISCOUNT100"
+                totalAmount:
+                  type: number
+                  example: 1000
+                paymentType:
+                  type: number
+                  example: 1
+      responses:
+        "200":
+          description: Order added successfully
+        "500":
+          description: Internal server error
+
+  #order update put api documentation
+  /order/update/{id}:
+    put:
+      summary: update order
+      tags:
+        - Order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: order Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - paymentStatus
+                - orderStatus
+                - shippingStatus
+              properties:
+                paymentStatus:
+                  type: number
+                  description: payment status
+                  example: 1
+                orderStatus:
+                  type: number
+                  description: order status
+                  example: 1
+                shippingStatus:
+                  type: number
+                  description: shipping status
+                  example: 1
+      responses:
+        "200":
+          description: Order updated successfully
+        "500":
+          description: Internal server error
+
+  # order delete api documentation
+  /order/delete/{id}:
+    delete:
+      summary: Delete order
+      tags:
+        - Order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: order Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order deleted successfully
+        "500":
+          description: Internal server error
+  # order details: get api documentation
+  /order/details/{id}:
+    get:
+      summary: Get order details
+      tags:
+        - Order
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: order Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved order details
+        "500":
+          description: Internal server error
+
+  # order list get api documentation
+  /order/list:
+    get:
+      summary: Get all orders
+      tags:
+        - Order
+      responses:
+        "200":
+          description: "all orders List retrieved successfully"
+        "500":
+          description: Internal server error
+
+  #review add post api documentation
+  /review/add:
+    post:
+      summary: Add a new review
+      description: user  add  review,ranting and add comment
+      tags:
+        - Review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - productId
+                - rating
+                - comment
+              properties:
+                userId:
+                  type: string
+                  example: "67a44c203fb942f0ea219fba"
+                productId:
+                  type: string
+                  example: "67a478d02f3aa3de44558df3"
+                rating:
+                  type: number
+                  example: 5
+                comment:
+                  type: string
+                  example: "Great product!"
+      responses:
+        "200":
+          description: Review added successfully
+        "500":
+          description: Internal server error
+
+  #review details get api documentation
+
+  /review/details/{id}:
+    get:
+      summary: get specific review details by review Id
+      tags:
+        - Review
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: review Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Successfully retrieved review"
+        "500":
+          description: "Internal server error"
+
+  # review list get api documentation
+  /review/list:
+    get:
+      summary: Get retrieved all review
+      tags:
+        - Review
+      responses:
+        "200":
+          description: retrieved all review list
+        "500":
+          description: Internal server error
+
+  # review delete api documentation
+  /review/delete/{id}:
+    delete:
+      summary: Deleted review
+      description: Delete review by review Id
+      tags:
+        - Review
+      operationId: deleteReview
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: review Id
+          schema:
+          type: string
+      responses:
+        "200":
+          description: review deleted successfully
+        "500":
+          description: Internal server error
+
+  #cart add post api documentation
+  /cart/add:
+    post:
+      summary: Add New cart
+      description: create new cart add product in to the cart
+      tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - userId
+              - productId
+              - quantity
+              - price
+            properties:
+              userId:
+                type: string
+                example: "67a44c203fb942f0ea219fba"
+              productId:
+                type: string
+                example: "67a478d02f3aa3de44558df3"
+              quantity:
+                type: string
+                example: 1
+              price:
+                type: number
+                example: 999
+      responses:
+        "200":
+          description: "Product Add to cart successfully"
+        "500":
+          description: Internal server error
+
+  # cart update put api documentation
+  /cart/update/{id}:
+    put:
+      summary: update cart
+      tags:
+        - Cart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: cart Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: user Id
+                  example: "67a1f257ea471ecf5b717e33"
+                productId:
+                  type: string
+                  description: product Id
+                  example: "67a1f257ea471ecf5b717e33"
+                quantity:
+                  type: number
+                  example: 1
+                price:
+                  type: number
+                  example: 999
+      responses:
+        "200":
+          description: Product update to cart successfully
+        "500":
+          description: Internal server error
+
+  # cart delete api documentation
+  /cart/delete/{id}:
+    delete:
+      summary: Cart delete by Id
+      tags:
+        - Cart
+      operationId: deleteCart
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: cart Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product remove form cart
+        "500":
+          description: Internal server error
+
+  # wishlist  post api documentation
+  /wishlist/add:
+    post:
+      summary: Add product in to the wishlist
+      tags:
+        - Wishlist
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - productId
+              properties:
+                userId:
+                  type: string
+                  example: "67b45651f92e535778ab7a2a"
+                productId:
+                  type: string
+                  example: "67b45651f92e535778ab7a2a"
+      responses:
+        "200":
+          description: Product Add to wishlist
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Product Add to wishlist successfully
+        "500":
+          description: Internal server error
+
+  # wishlist delete api documentation
+  /wishlist/delete/{id}:
+    delete:
+      summary: wishlist deleted
+      tags:
+        - Wishlist
+      operationId: deleteWishlist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: wishlist Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Wishlist item successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Product have removed successfully
+        "500":
+          description: Internal server error
+
+  #discount  post api documentation
+  /discount/add:
+    post:
+      summary: Add new discount
+      tags:
+        - Discount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - couponCode
+                - type
+              properties:
+                title:
+                  type: string
+                  example: "apply coupon"
+                couponCode:
+                  type: string
+                  example: "WELCOME@100"
+                type:
+                  type: string
+                  example: "flat"
+      responses:
+        "200":
+          description: discount add successfully
+        "500":
+          description: Internal server error
+
+  # discount put api documentation
+  /discount/update/{id}:
+    put:
+      summary: update discount couponCode
+      tags:
+        - Discount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: discount Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "apply coupon"
+                couponCode:
+                  type: string
+                  example: "welcome#100"
+                type:
+                  type: string
+                  example: "flat"
+      responses:
+        "200":
+          description: discount  update successfully
+        "500":
+          description: Internal server error
+
+  # discount delete api documentation
+  /discount/delete/{id}:
+    delete:
+      summary: delete discount
+      tags:
+        - Discount
+      operationId: deleteDiscount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: discount Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: discount deleted successfully
+        "500":
+          description: Internal server error
+
+  # discount get api documentation
+  /discount/list:
+    get:
+      summary: get all discount details
+      tags:
+        - Discount
+      responses:
+        "200":
+          description: Successfully retrieved all discount details
+        "500":
+          description: Internal server error
+  # discount get api documentation
+  /discount/details/{id}:
+    get:
+      summary: get specific discount id details
+      tags:
+        - Discount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successfully retrieved specific discount Id details
+        "500":
+          description: Internal server error
